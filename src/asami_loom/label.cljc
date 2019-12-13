@@ -47,7 +47,11 @@
 
   (label
    ([g node]
-    (label/label g node nil))
+    (let [ps (get-in g [:osp nil node])]
+      (or (first (filter string? ps))
+          (if-let [p (some identity ps)]
+            (name p)
+            (name node)))))
    ([g n1 n2]
     (let [ps (get-in g [:osp n2 n1])]
       (or (first (filter string? ps))
@@ -92,7 +96,12 @@
 
   (label
    ([g node]
-    (get-in g [:spo node nil nil :label]))
+    (let [node-map (get-in g [:spo node])]
+      (or
+       (get-in node-map [nil nil :label])
+       (some-> (:id node-map) keys first)
+       (some-> (:name node-map) keys first)
+       (name node))))
    ([g n1 n2]
     (or (get-in g [:spo n1 :to n2 :label])
         (let [ps (keys (get-in g [:osp n2 n1]))]
