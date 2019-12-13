@@ -16,7 +16,9 @@
 (defn node-only?
   "Tests if a graph contains a node without associated edges"
   [{spo :spo} n]
-  (contains? (get-in spo [n nil]) nil))
+  (let [o-level (get-in spo [n nil])]
+    (and (contains? o-level nil)
+         (not (:label (o-level nil))))))
 
 (defn clean
   "Removes a node-only entry from a graph"
@@ -107,7 +109,7 @@
     ([g [n1 n2]]
      (loom/weight g n1 n2))
     ([g n1 n2]
-     (->> (get-in [:osp n2 n1])
+     (->> (get-in g [:osp n2 n1])
           vals 
           (map :count)
           (apply +)))))

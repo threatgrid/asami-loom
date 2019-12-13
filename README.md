@@ -1,14 +1,30 @@
 # asami-loom
 
-A Clojure library designed to ... well, that part is up to you.
+This library extends Asami in-memory graphs to Loom.
+
+By requiring `asami-loom.index`, then the `asami.index.IndexGraph` graphs are extended to:
+- `loom.graph.Graph`
+- `loom.graph.EditableGraph`
+- `loom.graph.DiGraph`
+
+By requiring `asami-loom.multi-graph`, then the `asami.multi-graph.MultiGraph` graphs are extended to:
+- `loom.graph.Graph`
+- `loom.graph.EditableGraph`
+- `loom.graph.DiGraph`
+- `loom.graph.WeightedGraph`
+
+By requiring `asami-loom.label`, then both the `asami.index.IndexGraph` and `asami.multi-graph.MultiGraph`
+graphs get extended to:
+- `loom.label.LabeledGraph`
 
 ## Usage
 
-FIXME
+Requiring one of the above namespaces in any namespace that uses Asami in-memory graphs will automatically
+apply the extensions. Loom can use the graphs with the standard APIs.
 
 ## License
 
-Copyright © 2019 FIXME
+Copyright © 2019 Cisco Systems
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

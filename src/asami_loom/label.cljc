@@ -49,7 +49,7 @@
    ([g node]
     (label/label g node nil))
    ([g n1 n2]
-    (let [ps (keys (get-in g [:osp n2 n1]))]
+    (let [ps (get-in g [:osp n2 n1])]
       (or (first (filter string? ps))
           (if-let [p (some identity ps)] (name p) "-"))))))
 
@@ -92,7 +92,7 @@
 
   (label
    ([g node]
-    (get-in g [node nil nil :label]))
+    (get-in g [:spo node nil nil :label]))
    ([g n1 n2]
     (or (get-in g [:spo n1 :to n2 :label])
         (let [ps (keys (get-in g [:osp n2 n1]))]
