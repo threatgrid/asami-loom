@@ -100,7 +100,17 @@
     (let [nodes (keys (get osp nil))
           tuples (for [s (keys spo) [p om] (spo s) [o {c :count}] om] [s p o c])]
       (-> (reduce (fn [g [s p o c]] (if o (multi-graph-add g o p s c) g)) multi-graph/empty-multi-graph tuples)
-          (add-nodes* nodes)))))
+          (add-nodes* nodes))))
+
+  loom/WeightedGraph
+  (weight*
+    ([g [n1 n2]]
+     (loom/weight g n1 n2))
+    ([g n1 n2]
+     (->> (get-in [:osp n2 n1])
+          vals 
+          (map :count)
+          (apply +)))))
 
 (defn weighted-graph
   "Creates an index graph with a set of directed, weighted edges."
