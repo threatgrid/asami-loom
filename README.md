@@ -1,4 +1,4 @@
-# asami-loom
+# asami-loom [![Build Status](https://travis-ci.org/threatgrid/asami-loom.svg?branch=master)](https://travis-ci.org/threatgrid/asami-loom)
 
 This library extends Asami in-memory graphs to Loom.
 

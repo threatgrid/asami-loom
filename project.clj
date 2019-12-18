@@ -1,4 +1,4 @@
-(defproject org.clojars.quoll/asami-loom "0.1.0-SNAPSHOT"
+(defproject org.clojars.quoll/asami-loom "0.1.0"
   :description "Loom extensions to Asami"
   :url "http://threatgrid/asami-loom"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
