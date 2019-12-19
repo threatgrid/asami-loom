@@ -32,13 +32,13 @@
 
   (remove-label
    ([g node]
-    (let [ps (get-in [g :osp nil node])
+    (let [ps (get-in g [:osp nil node])
           labels (filter string? ps)]
       (if (seq labels)
         (reduce #(graph-delete %1 node %2 nil) g labels)
         g)))
    ([g n1 n2]
-    (let [ps (get-in [g :osp n2 n1])
+    (let [ps (get-in g [:osp n2 n1])
           labels (filter string? ps)]
       (if (seq labels)
         (-> (reduce #(graph-delete %1 n1 %2 n2) g labels)
@@ -86,11 +86,11 @@
 
   (remove-label
    ([g node]
-    (if (get-in [g :spo node nil nil :label])
+    (if (get-in g [:spo node nil nil :label])
       (remove-label g node nil nil)
       g))
    ([g n1 n2]
-    (if (get-in [g :spo n1 :to n2])
+    (if (get-in g [:spo n1 :to n2])
       (remove-label g n1 :to n2)
       g)))
 
