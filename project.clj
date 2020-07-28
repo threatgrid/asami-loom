@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.773"]
                  [prismatic/schema "1.1.12"] 
-                 [org.clojars.quoll/asami "1.0.0-SNAPSHOT"]
+                 [org.clojars.quoll/asami "1.0.0"]
                  [aysylu/loom "1.0.2"]]
   :repl-options {:init-ns asami-loom.multi-graph}
   :plugins [[lein-cljsbuild "1.1.7"]]
