@@ -66,7 +66,7 @@ With these assumptions in mind, we can use the following definitions to get labe
 ```clojure
 (defn edge-label
   [g s d]
-  (str (q '[:find ?edge . :in $ ?a ?b :where (or [?a ?e ?b] [?b ?e ?a])] g s d)))
+  (str (q '[:find ?edge . :in $ ?a ?b :where (or [?a ?edge ?b] [?b ?edge ?a])] g s d)))
 
 (defn node-label
   [g n]
@@ -83,7 +83,7 @@ With this configuration set up, the Loom `display` function can be used to creat
 (require '[asami-loom.label])
 (require '[loom.io :as loom-io])
 
-(loom-io/view graph :fmt :pdf :alg :sfdp :edge-label edge-label :node-label node-label)
+(loom-io/view graph :fmt :pdf :alg :sfdp :edge-label (partial edge-label graph) :node-label (partial node-label graph))
 ```
 
 ## View Parameters
