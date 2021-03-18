@@ -71,7 +71,7 @@
        (-> g
            (clean s)
            (clean o)
-           (multi-graph-add s :to o)))
+           (multi-graph-add s :to o gr/*default-tx-id*)))
      gr edges))
 
   (remove-nodes* [gr nodes]
@@ -101,7 +101,7 @@
   (transpose [{:keys [spo osp] :as gr}]
     (let [nodes (keys (get osp nil))
           tuples (for [s (keys spo) [p om] (spo s) [o {c :count}] om] [s p o c])]
-      (-> (reduce (fn [g [s p o c]] (if o (multi-graph-add g o p s c) g)) multi-graph/empty-multi-graph tuples)
+      (-> (reduce (fn [g [s p o c]] (if o (multi-graph-add g o p s gr/*default-tx-id* c) g)) multi-graph/empty-multi-graph tuples)
           (add-nodes* nodes))))
 
   loom/WeightedGraph
