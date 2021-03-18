@@ -1,4 +1,4 @@
-(defproject org.clojars.quoll/asami-loom "0.3.0"
+(defproject org.clojars.quoll/asami-loom "0.3.1"
   :description "Loom extensions to Asami"
   :url "http://threatgrid/asami-loom"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -7,6 +7,7 @@
                  [org.clojure/clojurescript "1.10.773"]
                  [prismatic/schema "1.1.12"] 
                  [org.clojars.quoll/asami "2.0.0-alpha4"]
+                 [com.fasterxml.jackson.core/jackson-core "2.10.2"]
                  [aysylu/loom "1.0.2"]]
   :repl-options {:init-ns asami-loom.multi-graph}
   :plugins [[lein-cljsbuild "1.1.8"]]
