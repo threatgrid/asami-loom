@@ -70,7 +70,7 @@ With these assumptions in mind, we can use the following definitions to get labe
 
 (defn node-label
   [g n]
-  (let [id (q [:find '?id . :where [n :db/ident '?id]] g)]
+  (let [id (q [:find '?id '. :where [n :db/ident '?id]] g)]
     (cond id (str id)
           (and (keyword? n) (= (namespace n) "tg")) (str ":" (name n))
           :default (str n))))
