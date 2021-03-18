@@ -1,4 +1,6 @@
-# asami-loom [![Build Status](https://travis-ci.org/threatgrid/asami-loom.svg?branch=master)](https://travis-ci.org/threatgrid/asami-loom)
+# asami-loom
+
+[![Clojars Project](http://clojars.org/org.clojars.quoll/asami-loom/latest-version.svg)](http://clojars.org/org.clojars.quoll/asami-loom)
 
 This library extends Asami in-memory graphs to Loom.
 
