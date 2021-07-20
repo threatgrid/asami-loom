@@ -1,28 +1,26 @@
 (ns ^{:doc "Extension of Asami in-memory index to Loom protocols"
       :author "Paula Gearon"}
-    asami-loom.index
+    asami-loom.durable
   (:require [asami.graph :as gr :refer [graph-add graph-delete resolve-triple]]
             [clojure.set :as set]
             [loom.graph :as loom :refer [nodes edges has-node? successors* build-graph
                                          out-degree out-edges
                                          add-edges* add-nodes*
                                          add-nodes add-edges]]
-            #?(:clj  [asami.index :as index]
-               :cljs [asami.index :as index :refer [GraphIndexed]])
-            #?(:clj  [schema.core :as s]
-               :cljs [schema.core :as s :include-macros true]))
-  #?(:clj (:import [asami.index GraphIndexed])))
+            #?(:clj  [asami.durable.common :as c]
+               :cljs [asami.durable.common :as c :refer [BlockGraph]]))
+  #?(:clj (:import [asami.index BlockGraph])))
 
 (defn node-only?
   "Tests if a graph contains a node without associated edges"
-  [{spo :spo} n]
-  (contains? (get-in spo [n nil]) nil))
+  [g n]
+  (seq (resolve-triple g n :tg/nil :tg/nil)))
 
 (defn clean
   "Removes a node-only entry from a graph"
   [g n]
   (if (node-only? g n)
-    (graph-delete g n nil nil)
+    (graph-delete g n :tg/nil :tg/nil)
     g))
 
 (defn all-triple-edges
@@ -31,14 +29,22 @@
     (map #(cons n %) (resolve-triple g n '?a '?b))
     (map #(conj % n) (resolve-triple g '?a '?b n))))
 
-(extend-type GraphIndexed
+(extend-type BlockGraph
   loom/Graph
-  (nodes [{:keys [spo osp] :as graph}]
-    (disj (into (set (keys spo)) (keys osp)) nil))
+  (nodes [{:keys [spot ospt pool] :as graph}]
+    (let [lineproc (map #(c/find-object pool (first %)))
+          subjects (c/find-tuples spot [])
+          objects (c/find-tuples ospt [])]
+      (disj (into #{} lineproc (concat subjects objects)) :tg/nil)))
 
-  (edges [{:keys [osp] :as graph}]
-    (for [[o sp] osp :when o s (keys sp)] [s o]))
+  (edges [{:keys [ospt pool] :as graph}]
+    (let [tuples (c/find-tuples ospt [])
+          tx (comp (map (fn [[o s]] [(c/find-object pool s) (c/find-object pool o)]))
+                   (remove #(= :tg/nil (first %)))
+                   (dedupe))]
+      (sequence tx tuples)))
 
+  ;; below here has been copy/pasted from index.cljc. Not yet converted and will fail
   (has-node? [{:keys [spo osp] :as graph} node]
     (when node (boolean (or (spo node) (osp node)))))
 
