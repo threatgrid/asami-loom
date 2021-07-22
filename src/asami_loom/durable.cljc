@@ -1,12 +1,11 @@
-(ns ^{:doc "Extension of Asami in-memory index to Loom protocols"
+(ns ^{:doc "Extension of Asami block-based durable index to Loom protocols"
       :author "Paula Gearon"}
     asami-loom.durable
   (:require [asami.graph :as gr :refer [graph-add graph-delete resolve-triple]]
             [clojure.set :as set]
             [loom.graph :as loom :refer [nodes edges has-node? successors* build-graph
                                          out-degree out-edges
-                                         add-edges* add-nodes*
-                                         add-nodes add-edges]]
+                                         add-edges* add-nodes*]]
             #?(:clj  [asami.durable.common :as c]
                :cljs [asami.durable.common :as c :refer [BlockGraph]]))
   #?(:clj (:import [asami.index BlockGraph])))
@@ -44,24 +43,31 @@
                    (dedupe))]
       (sequence tx tuples)))
 
-  ;; below here has been copy/pasted from index.cljc. Not yet converted and will fail
-  (has-node? [{:keys [spo osp] :as graph} node]
-    (when node (boolean (or (spo node) (osp node)))))
+  (has-node? [{:keys [spot ospt] :as graph} node]
+    (when (and node (not= :tg/nil node))
+      (boolean (or (seq (c/find-tuples spot [node]))
+                   (seq (c/find-tuples ospt [node]))))))
 
-  (has-edge? [{:keys [osp] :as graph} n1 n2]
-    (boolean (get-in osp [n2 n1])))
+  (has-edge? [{:keys [ospt] :as graph} n1 n2]
+    (boolean (seq (c/find-tuples ospt [n2 n1]))))
 
-  (successors* [{:keys [spo] :as graph} node]
-    (disj (apply set/union (vals (spo node))) nil))
+  (successors* [{:keys [spot pool] :as graph} node]
+    (let [os (comp (map #(nth % 2)) (map #(c/find-object pool)))
+          s (into #{} os (c/find-tuples spot [node]))]
+      (disj s :tg/nil)))
 
   (out-degree [{:keys [spo] :as graph} node]
     ;; drops duplicates for different predicates!
-    (count (disj (apply set/union (vals (spo node))) nil)))
+    (let [nil-val (c/find-id pool :tg/nil)
+          os (comp (map #(nth % 2)) (remove #(= nil-val %)))
+          o (sequence os (c/find-tuples spot [node]))]
+      (count o)))
 
-  (out-edges [{:keys [spo] :as graph} node]
+  (out-edges [graph node]
     "Returns all the outgoing edges of node"
-    (for [o (apply set/union (vals (spo node))) :when o] [node o]))
+    (for [o (successors* graph)] [node o]))
 
+  ;; below here has been copy/pasted from index.cljc. Not yet converted and will fail
   loom/EditableGraph
   (add-nodes* [gr nodes]
     (reduce
