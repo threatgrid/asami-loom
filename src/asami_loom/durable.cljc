@@ -43,36 +43,45 @@
                    (dedupe))]
       (sequence tx tuples)))
 
-  (has-node? [{:keys [spot ospt] :as graph} node]
+  (has-node? [{:keys [spot ospt pool] :as graph} node]
     (when (and node (not= :tg/nil node))
-      (boolean (or (seq (c/find-tuples spot [node]))
-                   (seq (c/find-tuples ospt [node]))))))
+      (let [n (c/find-id pool node)]
+        (boolean (or (seq (c/find-tuples spot [n]))
+                     (seq (c/find-tuples ospt [n])))))))
 
-  (has-edge? [{:keys [ospt] :as graph} n1 n2]
-    (boolean (seq (c/find-tuples ospt [n2 n1]))))
+  (has-edge? [{:keys [ospt pool] :as graph} node1 node2]
+    (let [n1 (c/find-id pool node1)
+          n2 (c/find-id pool node2)]
+      (boolean (and n1 n2 (seq (c/find-tuples ospt [n2 n1]))))))
 
   (successors* [{:keys [spot pool] :as graph} node]
-    (let [os (comp (map #(nth % 2)) (map #(c/find-object pool)))
-          s (into #{} os (c/find-tuples spot [node]))]
+    (let [n (c/find-id pool node)
+          os (comp (map #(nth % 2)) (map #(c/find-object pool %)))
+          s (into #{} os (c/find-tuples spot [n]))]
       (disj s :tg/nil)))
 
-  (out-degree [{:keys [spo] :as graph} node]
+  (out-degree [{:keys [spot pool] :as graph} node]
     ;; drops duplicates for different predicates!
     (let [nil-val (c/find-id pool :tg/nil)
+          n (c/find-id pool node)
           os (comp (map #(nth % 2)) (remove #(= nil-val %)))
-          o (sequence os (c/find-tuples spot [node]))]
+          o (sequence os (c/find-tuples spot [n]))]
       (count o)))
 
   (out-edges [graph node]
     "Returns all the outgoing edges of node"
-    (for [o (successors* graph)] [node o]))
+    (for [o (successors* graph node)] [node o]))
 
-  ;; below here has been copy/pasted from index.cljc. Not yet converted and will fail
   loom/EditableGraph
   (add-nodes* [gr nodes]
     (reduce
-     (fn [{:keys [spo osp] :as g} n]
-       (if (or (spo n) (osp n)) g (graph-add g n nil nil)))
+     (fn [{:keys [spot ospt pool] :as g} node]
+       (let [n (c/find-id pool node)] 
+         (if (or (nil? n)
+                 (and (empty? (c/find-tuples spot [n])) 
+                      (empty? (c/find-tuples ospt [n]))))
+           (graph-add g node :tg/nil :tg/nil)
+           g)))
      gr nodes))
 
   (add-edges* [gr edges]
@@ -84,9 +93,10 @@
            (graph-add s :to o)))
      gr edges))
 
-  (remove-nodes* [gr nodes]
+  ;; below here has been copy/pasted from index.cljc. Not yet converted and will fail
+  (remove-nodes* [{pool :as gr} nodes]
     (reduce
-     (fn [{:keys [spo osp] :as g} [s o]]
+     (fn [{:keys [spot ospt] :as g} [s o]]
        (let [other-ends (into (apply set/union (vals (spo s))) (keys (osp o)))
              all-triples (concat (all-triple-edges g s) (all-triple-edges g o))
              {:keys [spo* osp*] :as scrubbed} (reduce #(apply graph-delete %1 %2)
