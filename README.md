@@ -1,3 +1,5 @@
+> This repository is no longer being maintained. For ongoing development, please see https://github.com/quoll/asami-loom.
+
 # asami-loom
 
 [![Clojars Project](http://clojars.org/org.clojars.quoll/asami-loom/latest-version.svg)](http://clojars.org/org.clojars.quoll/asami-loom)
